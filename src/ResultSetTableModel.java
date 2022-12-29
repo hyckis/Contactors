@@ -1,4 +1,4 @@
-// YICHIN HO
+// Author: YICHIN HO
 
 import java.sql.*;
 import javax.swing.table.*;

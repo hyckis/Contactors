@@ -22,9 +22,9 @@ public class MemberQueries {
 		try {
 			connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
 			selectAllMem = connection.prepareStatement(DEFAULT_QUERY);
-			insertNewMem = connection.prepareStatement("INSERT INTO people " + "(name, type, phone) " + "VALUES(?, ?, ?)");
+			insertNewMem = connection.prepareStatement("INSERT INTO people " + "(name, type, phone, Class) " + "VALUES(?, ?, ?, ?)");
 			deleteMem = connection.prepareStatement("DELETE FROM people WHERE " + "(memberID = ?)");
-			updateMem = connection.prepareStatement("UPDATE people SET name = ?, type = ?, phone = ? WHERE "+"(memberID = ?)");
+			updateMem = connection.prepareStatement("UPDATE people SET name = ?, type = ?, phone = ?, Class = ? WHERE "+"(memberID = ?)");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -61,6 +61,17 @@ public class MemberQueries {
 		}
 		return tableModel;
 	}
+	
+	public ResultSetTableModel getGroupTable(String selectedGroup) {
+		String CLASS_QUERY = "SELECT * FROM people WHERE Class = '" + selectedGroup + "'";
+		try {
+			tableModel = new ResultSetTableModel(URL, USERNAME, PASSWORD, CLASS_QUERY);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			tableModel.disconnectFromDatabase();
+		}
+		return tableModel;
+	}
 
 	public List<Member> getAllMember() {
 		ResultSet resultSet = null;
@@ -69,10 +80,11 @@ public class MemberQueries {
 			resultSet = selectAllMem.executeQuery();
 			while (resultSet.next()) {
 				results.add(new Member(
-					resultSet.getInt("memberID"),
+					resultSet.getInt("MemberID"),
 					resultSet.getString("name"),
 					resultSet.getString("type"),
-					resultSet.getString("phone")
+					resultSet.getString("phone"),
+					resultSet.getString("Class")
 				));
 			}
 		} catch (SQLException e) {
@@ -88,11 +100,12 @@ public class MemberQueries {
 		return results;
 	}
 
-	public void addMember(String name, String type, String phone) {
+	public void addMember(String name, String type, String phone, String group) {
 		try {
 			insertNewMem.setString(1, name);
 			insertNewMem.setString(2, type);
 			insertNewMem.setString(3, phone);
+			insertNewMem.setString(4, group);
 			int result = insertNewMem.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -110,12 +123,13 @@ public class MemberQueries {
 		}
 	}
 
-	public void updateMember(int memberID, String name, String type, String phone) {
+	public void updateMember(int memberID, String name, String type, String phone, String group) {
 		try {
 			updateMem.setString(1, name);
 			updateMem.setString(2, type);
 			updateMem.setString(3, phone);
-			updateMem.setInt(4, memberID);
+			updateMem.setString(4, group);
+			updateMem.setInt(5, memberID);
 			int result = updateMem.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();

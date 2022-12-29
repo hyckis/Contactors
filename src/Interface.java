@@ -9,7 +9,7 @@ public class Interface extends JFrame {
 
 	MemberQueries memberQueries = new MemberQueries();
 	int memberID;
-	String name, type, phone;
+	String name, type, phone, group;
 	int mode;	// 0 -> add; 1 -> update
 
 	// title + search
@@ -47,6 +47,12 @@ public class Interface extends JFrame {
 	JPanel addPhone = new JPanel();
 	JLabel addPhoneLabel = new JLabel("Enter Phone(required. 9 or 10 nums, start with 0):    ");
 	JTextField addPhoneField = new JTextField();
+	// add group
+	JPanel addGroup = new JPanel();
+	JLabel addGroupLabel = new JLabel("Choose group:    ");
+	String[] groups = {"classmate", "family", "BFF", "hate"};
+	JComboBox<String> addGroupBox = new JComboBox<>(groups);
+	JComboBox<String> chooseGroupBox = new JComboBox<>(groups);
 	// button for confirm and cancel
 	JPanel buttons = new JPanel();
 	JButton confirm = new JButton("confirm");
@@ -75,6 +81,7 @@ public class Interface extends JFrame {
 				addNameField.setText("");
 				addTypeBox.setSelectedItem("");
 				addPhoneField.setText("");
+				addGroupBox.setSelectedIndex(0);
 			}
 		});
 		title.add(titleLabel);
@@ -111,6 +118,15 @@ public class Interface extends JFrame {
 		// display
 		display.setLayout(new BoxLayout(display, BoxLayout.Y_AXIS));
 		resultTable.setModel(memberQueries.getTableModel());	// set table of name results
+		// action listener for group combo box
+		chooseGroupBox.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent event) {
+				group = chooseGroupBox.getSelectedItem().toString();
+				if (event.getStateChange() == ItemEvent.SELECTED)
+					newResultTable(3);
+			}
+		});
 		// mouse listener for result table
 		resultTable.addMouseListener(new MouseAdapter() {	// mouse listener for table rows
 			@Override
@@ -153,6 +169,13 @@ public class Interface extends JFrame {
 		addPhone.add(addPhoneLabel);
 		addPhone.add(Box.createGlue());
 		addPhone.add(addPhoneField);
+		// choose group
+		addGroup.setLayout(new BoxLayout(addGroup, BoxLayout.X_AXIS));
+		addGroupLabel.setFont(new Font("Candara", Font.PLAIN, 15));
+		addGroupBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+		addGroup.add(addGroupLabel);
+		addGroup.add(Box.createGlue());
+		addGroup.add(addGroupBox);
 		// confirm and cancel button
 		buttons.setLayout(new BoxLayout(buttons, BoxLayout.X_AXIS));
 		buttons.add(Box.createGlue());
@@ -165,12 +188,13 @@ public class Interface extends JFrame {
 				String name = addNameField.getText();
 				String type = addTypeBox.getSelectedItem().toString();
 				String phone = addPhoneField.getText();
+				String group = addGroupBox.getSelectedItem().toString();
 				if (!name.equals("") && !phone.equals("") && validPhoneInput(type, phone)) {
 					if (mode == 0) {	// mode of adding
-						memberQueries.addMember(name, type, phone);
+						memberQueries.addMember(name, type, phone, group);
 						JOptionPane.showMessageDialog(null, "successful adding!", "notice", 1);
 					} else if (mode == 1) {	// mode of updating
-						memberQueries.updateMember(memberID, name, type, phone);
+						memberQueries.updateMember(memberID, name, type, phone, group);
 						JOptionPane.showMessageDialog(null, "successful updating!", "notice", 1);
 					}
 					newResultTable(0);	// update new table
@@ -212,6 +236,7 @@ public class Interface extends JFrame {
 				addNameField.setText(name);
 				addTypeBox.setSelectedItem(type);
 				addPhoneField.setText(phone);
+				addGroupBox.setSelectedItem(group);
 				Window win = SwingUtilities.getWindowAncestor(update);	// find the window that includes revise button
 				win.dispose();	// close the window
 			}
@@ -231,16 +256,24 @@ public class Interface extends JFrame {
 		TableRowSorter<ResultSetTableModel> defaultSorter = new TableRowSorter<ResultSetTableModel>(memberQueries.getTableModel());
 		TableRowSorter<ResultSetTableModel> nameSorter = new TableRowSorter<ResultSetTableModel>(memberQueries.getNameTable(keyword));
 		TableRowSorter<ResultSetTableModel> phoneSorter = new TableRowSorter<ResultSetTableModel>(memberQueries.getPhoneTable(keyword));
+		TableRowSorter<ResultSetTableModel> groupSorter = new TableRowSorter<ResultSetTableModel>(memberQueries.getGroupTable(group));
 		if (tableType == 1) {	// result table of searching by name
 			resultTable.setModel(memberQueries.getNameTable(keyword));
 			resultTable.setRowSorter(nameSorter);
 		} else if (tableType == 2) {	// result table of searching by type
 			resultTable.setModel(memberQueries.getPhoneTable(keyword));
 			resultTable.setRowSorter(phoneSorter);
+		} else if (tableType == 3) {
+			resultTable.setModel(memberQueries.getGroupTable(group));
+			resultTable.setRowSorter(groupSorter);
 		} else if (tableType == 0) {	// default result table
 			resultTable.setModel(memberQueries.getTableModel());
 			resultTable.setRowSorter(defaultSorter);
 		}
+		display.add(Box.createGlue());
+		chooseGroupBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+		display.add(chooseGroupBox);
+		display.add(Box.createGlue());
 		display.add(new JScrollPane(resultTable));
 		display.revalidate();
 		display.repaint();
@@ -256,6 +289,7 @@ public class Interface extends JFrame {
 		display.add(addName);
 		display.add(addType);
 		display.add(addPhone);
+		display.add(addGroup);
 		display.add(Box.createGlue());
 		display.add(buttons);
 		display.revalidate();
