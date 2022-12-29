@@ -6,14 +6,16 @@ public class Member {
 	private String name;
 	private String type;
 	private String phone;
-
+	private String group;
+	
 	public Member() {}
 
-	public Member(int memberID, String name, String type, String phone) {
+	public Member(int memberID, String name, String type, String phone, String group) {
 		setMemberID(memberID);
 		setName(name);
 		setType(type);
 		setPhone(phone);
+		setGroup(group);
 	}
 
 	public void setMemberID(int memberID) {
@@ -42,6 +44,13 @@ public class Member {
 	}
 	public String getPhone() {
 		return phone;
+	}
+	
+	public void setGroup(String group) {
+		this.group = group;
+	}
+	public String getGroup() {
+		return group;
 	}
 
 }
